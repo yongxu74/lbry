@@ -19,7 +19,8 @@ at anytime.
   * Renamed `lbrynet.lbrynet_daemon` to `lbrynet.daemon`
   * Initialize lbrynet settings when configuring an api client if they are not set yet
   * Updated lbryum imports
-  *
+  * Removed deprecated resolve_name API command
+  * Removed uri argument from blob_list
 
 ### Fixed
   * Fixed some log messages throwing exceptions
