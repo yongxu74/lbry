@@ -689,21 +689,6 @@ class Daemon(AuthJSONRPCServer):
         f.close()
         return defer.succeed(True)
 
-    @defer.inlineCallbacks
-    def _resolve_name(self, name, force_refresh=False):
-        """Resolves a name. Checks the cache first before going out to the blockchain.
-
-        Args:
-            name: the lbry://<name> to resolve
-            force_refresh: if True, always go out to the blockchain to resolve.
-        """
-
-        parsed = parse_lbry_uri(name)
-        resolution = yield self.session.wallet.resolve(parsed.name, check_cache=not force_refresh)
-        if parsed.name in resolution:
-            result = resolution[parsed.name]
-            defer.returnValue(result)
-
     def _get_or_download_sd_blob(self, blob, sd_hash):
         if blob:
             return self.session.blob_manager.get_blob(blob[0])
@@ -1176,7 +1161,7 @@ class Daemon(AuthJSONRPCServer):
             return self._render_response({
                 'about': 'This is the LBRY JSON-RPC API',
                 'command_help': 'Pass a `command` parameter to this method to see ' +
-                                'help for that command (e.g. `help command=resolve_name`)',
+                                'help for that command (e.g. `help command=resolve`)',
                 'command_list': 'Get a full list of commands using the `commands` method',
                 'more_info': 'Visit https://lbry.io/api for more info',
             })
@@ -1296,30 +1281,6 @@ class Daemon(AuthJSONRPCServer):
         response = yield self._render_response(result)
         defer.returnValue(response)
 
-    @defer.inlineCallbacks
-    @AuthJSONRPCServer.flags(force='-f')
-    def jsonrpc_resolve_name(self, name, force=False):
-        """
-        Resolve stream info from a LBRY name
-
-        Usage:
-            resolve_name <name> [-f]
-
-        Options:
-            -f  : force refresh and do not check cache
-
-        Returns:
-            (dict) Metadata dictionary from name claim, None if the name is not
-                    resolvable
-        """
-
-        try:
-            metadata = yield self._resolve_name(name, force_refresh=force)
-        except UnknownNameError:
-            log.info('Name %s is not known', name)
-            defer.returnValue(None)
-        else:
-            defer.returnValue(metadata)
 
     @defer.inlineCallbacks
     def jsonrpc_claim_show(self, name=None, txid=None, nout=None, claim_id=None):
@@ -2405,20 +2366,19 @@ class Daemon(AuthJSONRPCServer):
 
     @defer.inlineCallbacks
     @AuthJSONRPCServer.flags(needed="-n", finished="-f")
-    def jsonrpc_blob_list(self, uri=None, stream_hash=None, sd_hash=None, needed=None,
+    def jsonrpc_blob_list(self, stream_hash=None, sd_hash=None, needed=None,
                           finished=None, page_size=None, page=None):
         """
         Returns blob hashes. If not given filters, returns all blobs known by the blob manager
 
         Usage:
-            blob_list [-n] [-f] [<uri> | --uri=<uri>] [<stream_hash> | --stream_hash=<stream_hash>]
+            blob_list [-n] [-f] [<stream_hash> | --stream_hash=<stream_hash>]
                       [<sd_hash> | --sd_hash=<sd_hash>] [<page_size> | --page_size=<page_size>]
                       [<page> | --page=<page>]
 
         Options:
             -n                                          : only return needed blobs
             -f                                          : only return finished blobs
-            <uri>, --uri=<uri>                          : filter blobs by stream in a uri
             <stream_hash>, --stream_hash=<stream_hash>  : filter blobs by stream hash
             <sd_hash>, --sd_hash=<sd_hash>              : filter blobs by sd hash
             <page_size>, --page_size=<page_size>        : results page size
@@ -2428,11 +2388,7 @@ class Daemon(AuthJSONRPCServer):
             (list) List of blob hashes
         """
 
-        if uri:
-            metadata = yield self._resolve_name(uri)
-            sd_hash = utils.get_sd_hash(metadata)
-            blobs = yield self.get_blobs_for_sd_hash(sd_hash)
-        elif stream_hash:
+        if stream_hash:
             try:
                 blobs = yield self.get_blobs_for_stream_hash(stream_hash)
             except NoSuchStreamHash:
