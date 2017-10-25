@@ -41,11 +41,16 @@ at anytime.
   * Check dht peers requesting to store can be contacted before accepting
   * Use `pingback` to check connectivity on startup, don't try to send `store` queries if this fails
   * Improved logging of dht errors and non-typical behavior
-
+  * Return announce info dictionary of `{<blob_hash>: [<node_id>, ...]}` results from `blob_announce`
+  * Return a list of dictionaries from `peer_list`, add `node_id` to peer info
+  
 ### Added
   * Added `wallet_prefill_addresses` command, which distributes credits to multiple addresses
   * Added `JSONFileDataStore` to persist dht node state and contacts
   * Added `pingback` dht method to test connectivity
+  * Added `peer_ping` daemon command
+  * Added `blob_hashes` parameter to `blob_announce`
+  
 
 ### Removed
   *
