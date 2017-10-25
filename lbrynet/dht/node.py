@@ -195,13 +195,13 @@ class Node(object):
 
         # used in case the restored contacts cannot be reached
         if knownNodeAddresses is not None:
-            failsafeNodeAddresses = knownNodeAddresses
+            failsafeNodeAddresses = list(knownNodeAddresses)
         else:
             failsafeNodeAddresses = []
 
         if contacts:  # connect to the network via previous closest contacts
             bootstrapContacts = []
-            knownNodeAddresses = failsafeNodeAddresses
+            knownNodeAddresses = list(failsafeNodeAddresses)
             for contact in contacts:
                 knownNodeAddresses.append((contact.address, contact.port))
                 bootstrapContacts.append(contact)
