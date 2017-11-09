@@ -22,14 +22,13 @@ at anytime.
 
 ### Changed
   * Check claim schema in `publish` before trying to make the claim, return better error messages
-  *
   * Refactor several dht internals to inlineCallbacks
   * Retry announcing a blob up to three times if no peers store the announcement
   * Return storing peer information from the hash announcer after finishing an announce call
   * Convert `DHTHashAnnouncer` and `Node` manage functions to `LoopingCall`s.
 
 ### Added
-  *
+  * Made announce time duration for blob adjustable and readable via status API command
   *
 
 ### Removed
