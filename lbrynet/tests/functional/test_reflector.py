@@ -71,7 +71,6 @@ class TestReflector(unittest.TestCase):
 
         self.stream_info_manager = EncryptedFileMetadataManager.DBEncryptedFileMetadataManager(
                                     self.db_dir)
-
         self.lbry_file_manager = EncryptedFileManager.EncryptedFileManager(
             self.session, self.stream_info_manager, sd_identifier)
 
@@ -123,7 +122,7 @@ class TestReflector(unittest.TestCase):
 
         def start_server():
             server_factory = reflector.ServerFactory(
-                peer_manager, self.server_blob_manager, self.server_stream_info_manager)
+                peer_manager, self.server_blob_manager, self.server_stream_info_manager, self.lbry_file_manager)
             from twisted.internet import reactor
             port = 8943
             while self.reflector_port is None:
@@ -186,11 +185,16 @@ class TestReflector(unittest.TestCase):
             expected_sd_hash = self.expected_blobs[-1][0]
             self.assertEqual(self.sd_hash, sd_hashes[0])
 
+            # check lbry_file_manager has the file
+            self.
+
             # check should_announce blobs on blob_manager
             blob_hashes = yield self.server_blob_manager._get_all_should_announce_blob_hashes()
             self.assertEqual(2, len(blob_hashes))
             self.assertTrue(self.sd_hash in blob_hashes)
             self.assertTrue(expected_blob_hashes[0] in blob_hashes)
+
+
 
         def verify_have_blob(blob_hash, blob_size):
             d = self.server_blob_manager.get_blob(blob_hash)

@@ -90,7 +90,7 @@ class EncryptedFileManager(object):
             EncryptedFileStreamType, downloader_factory)
 
     @defer.inlineCallbacks
-    def _check_stream_is_managed(self, stream_hash):
+    def check_stream_is_managed(self, stream_hash):
         # check that all the streams in the stream_info_manager are also
         # tracked by lbry_file_manager and fix any streams that aren't.
         rowid = yield self._get_rowid_for_stream_hash(stream_hash)
@@ -105,7 +105,7 @@ class EncryptedFileManager(object):
     def _check_stream_info_manager(self):
         def _iter_streams(stream_hashes):
             for stream_hash in stream_hashes:
-                yield self._check_stream_is_managed(stream_hash)
+                yield self.check_stream_is_managed(stream_hash)
 
         stream_hashes = yield self.stream_info_manager.get_all_streams()
         log.debug("Checking %s streams", len(stream_hashes))
@@ -183,8 +183,10 @@ class EncryptedFileManager(object):
             yield self._stop_lbry_file(lbry_file)
 
     @defer.inlineCallbacks
-    def add_lbry_file(self, stream_hash, payment_rate_manager, blob_data_rate=None,
+    def add_lbry_file(self, stream_hash, payment_rate_manager=None, blob_data_rate=None,
                       download_directory=None, file_name=None):
+        if payment_rate_manager is None:
+            payment_rate_manager = self.session.payment_rate_manager
         rowid = yield self._save_lbry_file(stream_hash, blob_data_rate)
         lbry_file = yield self.start_lbry_file(rowid, stream_hash, payment_rate_manager,
                                                blob_data_rate, download_directory,
