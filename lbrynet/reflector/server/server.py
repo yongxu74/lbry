@@ -109,7 +109,8 @@ class ReflectorServer(Protocol):
             yield self.stream_info_manager.save_sd_blob_hash_to_stream(sd_info['stream_hash'],
                                                                        blob.blob_hash)
 
-            yield self.lbry_file_manager.add_lbry_file(sd_info['stream_hash'])
+            out = yield self.lbry_file_manager.add_lbry_file(sd_info['stream_hash'])
+            log.info("Added to file manager: %s", out)
             should_announce = True
 
             # if we already have the head blob, set it to be announced now that we know it's
