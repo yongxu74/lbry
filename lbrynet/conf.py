@@ -24,6 +24,9 @@ log = logging.getLogger(__name__)
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Compatibility Version of the wire protocol. Increasing this will break backward compatibility
+COMPAT_VERSION = 1
+
 ENV_NAMESPACE = 'LBRY_'
 
 LBRYCRD_WALLET = 'lbrycrd'
