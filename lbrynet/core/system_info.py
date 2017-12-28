@@ -2,13 +2,16 @@ import platform
 import json
 import subprocess
 import os
+import logging
 
 from urllib2 import urlopen
 from lbryschema import __version__ as lbryschema_version
 from lbryum import __version__ as LBRYUM_VERSION
 from lbrynet import build_type, __version__ as lbrynet_version
+from lbrynet import conf
 from lbrynet.conf import ROOT_DIR
 
+log = logging.getLogger(__name__)
 
 def get_lbrynet_version():
     if build_type.BUILD == "dev":
@@ -38,9 +41,13 @@ def get_platform(get_ip=True):
     }
 
     if get_ip:
-        try:
-            p['ip'] = json.load(urlopen('http://ipv4.jsonip.com'))['ip']
-        except:
-            p['ip'] = "Could not determine IP"
+        if conf.settings.is_default('external_ip'):
+            try:
+                p['ip'] = json.load(urlopen('http://ipv4.jsonip.com'))['ip']
+            except:
+                p['ip'] = "Could not determine IP"
+        else:
+            p['ip'] = conf.settings['external_ip']
+            log.info('Using configured external IP: %s' % p['ip'])
 
     return p
